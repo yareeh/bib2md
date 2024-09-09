@@ -48,6 +48,11 @@ fn main() {
 
     // Simple parsing and conversion logic
     for (i, entry) in bib_content.split("\n@").enumerate() {
+        // Skip header
+        if i == 0 {
+            continue;
+        }
+
         let entry = format!("@{}", entry); // Add @ back to each BibTeX entry
 
         // Create a markdown file for each BibTeX entry
