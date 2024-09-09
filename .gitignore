@@ -1,0 +1,28 @@
+# Binaries for programs and tests
+/target/
+
+# Cargo package manager lock file (if you don't want to commit it)
+/Cargo.lock
+
+# Build script output
+**/*.rs.bk
+
+# Ignore build script output
+/build/
+
+# Dependency directory for Cargo (will be regenerated)
+/deps/
+
+# MacOS specific files
+.DS_Store
+
+# Binary output files (optional)
+/bib2md
+
+# Shell script backups (optional)
+*.sh.bk
+
+# Temporary files
+*.tmp
+*.bak
+*~
