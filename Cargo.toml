@@ -4,4 +4,6 @@ version = "1.0.0"
 edition = "2021"
 
 [dependencies]
+biblatex = "0.9"
 clap = { version = "4.0", features = ["derive"] }
+

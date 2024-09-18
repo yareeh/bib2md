@@ -1,3 +1,4 @@
+use biblatex::{Bibliography, ChunksExt, Entry, Person};
 use clap::Parser;
 use std::fs;
 use std::path::Path;
@@ -46,33 +47,51 @@ fn main() {
         }
     };
 
-    // Simple parsing and conversion logic
-    for (i, entry) in bib_content.split("\n@").enumerate() {
-        // Skip header
-        if i == 0 {
-            continue;
-        }
+    let bibliography = Bibliography::parse(&bib_content).unwrap();
 
-        let entry = format!("@{}", entry); // Add @ back to each BibTeX entry
+    bibliography.iter().for_each(|entry| {
+        println!("{}", entry.key);
 
-        // Create a markdown file for each BibTeX entry
-        let output_file = format!("{}/entry_{}.md", &args.output, i);
-        if let Err(e) = fs::write(&output_file, bibtex_to_markdown(&entry)) {
+        let output_file = format!("{}/{}.md", &args.output, entry.key);
+        if let Err(e) = fs::write(&output_file, entry_to_markdown(&entry)) {
             eprintln!("Error writing output file {}: {}", output_file, e);
             exit(1);
         }
-    }
+    });
 
-    println!("Successfully converted .bib entries to Markdown in {}", &args.output);
+    println!(
+        "Successfully converted .bib entries to Markdown in {}",
+        &args.output
+    );
 }
 
-// Basic function to convert BibTeX entry to Markdown format
-fn bibtex_to_markdown(bibtex_entry: &str) -> String {
+fn get_author_string(entry: &Entry) -> String {
+    match entry.author() {
+        Ok(authors) => format_authors(&authors),
+        Err(_) => "Unknown".to_string(),
+    }
+}
+
+fn format_authors(authors: &[Person]) -> String {
+    authors
+        .iter()
+        .map(|author| format!("{}", author))
+        .collect::<Vec<String>>()
+        .join(" and ")
+}
+
+fn entry_to_markdown(entry: &Entry) -> String {
     let mut md_content = String::new();
-    md_content.push_str("# BibTeX Entry\n\n");
-    md_content.push_str("```bibtex\n");
-    md_content.push_str(bibtex_entry);
-    md_content.push_str("\n```\n");
+    md_content.push_str(&format!("# {}\n\n", entry.key));
+    md_content.push_str(&format!(
+        "## {}: {}\n\n",
+        get_author_string(entry),
+        entry.title().unwrap().format_verbatim()
+    ));
+
+    entry.fields.iter().for_each(|field| {
+        md_content.push_str(&format!("- {}: {}\n", field.0, field.1.format_verbatim()));
+    });
 
     md_content
 }
